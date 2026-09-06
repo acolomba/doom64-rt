@@ -232,6 +232,9 @@ export SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-x11}"
 export LD_LIBRARY_PATH="$ENGINE${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export RTGL1_LIBRARY_PATH="${RTGL1_LIBRARY_PATH:-$ENGINE/rt/bin/libRTGL1.so}"
 export GZDOOM_RT_ASSET_DIR="${GZDOOM_RT_ASSET_DIR:-$ENGINE/rt}"
+# Doom64-RT keeps its own prepared-runtime cache: sharing gzdoom-rt's would
+# ping-pong the "current" runtime between the two games on every launch.
+export GZDOOM_RT_RUNTIME_DIR="${GZDOOM_RT_RUNTIME_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/doom64-rt/runtime/current}"
 
 # NO -width/-height here: the window size the player saves in the menus is
 # theirs to keep (see the .cmd for the story).
