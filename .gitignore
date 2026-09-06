@@ -252,3 +252,9 @@ Doom64-Retribution/Retribution-RT-Materials/rt/mat_dev/VILE*_e.png
 tools/vile-glow-gallery.html
 tools/sprite-mark-gallery.html
 tools/glow-gallery.html
+
+# Linux build outputs (tools/build-linux.sh, tools/appimage/build-appimage.sh)
+build/
+AppDir/
+/AppImageBuilder.yml
+appimage-build/

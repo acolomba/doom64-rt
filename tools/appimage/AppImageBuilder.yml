@@ -1,0 +1,39 @@
+# AppDir is populated by tools/appimage/build-appimage.sh from the
+# build/linux/stage bundle. Modeled on gzdoom-rt's own AppImage recipe.
+version: 1
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: com.doom64rt.Doom64RT
+    name: Doom64-RT
+    icon: d64rt_icon
+    version: latest
+    exec: launch-doom64-rt.sh
+    exec_args: $@
+  apt:
+    arch: amd64
+    sources:
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble main universe
+      key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-updates main universe
+      key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
+    include:
+    - libopenal1
+    - libsdl2-2.0-0
+    - libsndfile1
+    - libvpx9
+    - libwebp7
+  runtime:
+    env:
+      GZDOOM_RT_ASSET_DIR: '$APPDIR/rt'
+  files:
+    include: []
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+AppImage:
+  arch: x86_64
+  update-information: guess

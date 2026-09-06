@@ -1,0 +1,106 @@
+name: Linux AppImage
+
+on:
+  pull_request:
+    paths:
+      - tools/appimage/**
+      - tools/build-linux.sh
+      - launch-doom64-rt.sh
+      - .github/workflows/appimage-linux.yml
+  push:
+    branches: [linux-port]
+    paths:
+      - tools/appimage/**
+      - tools/build-linux.sh
+      - launch-doom64-rt.sh
+      - .github/workflows/appimage-linux.yml
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-appimage:
+    name: Build Doom64-RT Linux AppImage
+    runs-on: ubuntu-24.04
+    env:
+      # Repository variables: the stock gzdoom-rt release rt/ archive (the same
+      # gzdoom-rt-1.0.2.zip the Windows build stages from) and its checksum.
+      RT_ASSETS_URL: ${{ vars.RT_ASSETS_URL }}
+      RT_ASSETS_SHA256: ${{ vars.RT_ASSETS_SHA256 }}
+      # Optional: supplying the DLSS SDK archive enables native DLSS in RTGL.
+      DLSS_SDK_URL: ${{ vars.DLSS_SDK_URL }}
+      DLSS_SDK_SHA256: ${{ vars.DLSS_SDK_SHA256 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clone the engine (acolomba/gzdoom-rt doom64-rt-linux)
+        run: |
+          git clone --recurse-submodules --depth 1 -b doom64-rt-linux \
+            https://github.com/acolomba/gzdoom-rt.git sourcecode/gzdoom-rt
+
+      - name: Install build and AppImage dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            binutils clang cmake coreutils curl desktop-file-utils fakeroot file fuse \
+            libgl1-mesa-dev libopenal-dev libsndfile1-dev libsdl2-dev libvpx-dev \
+            libwebp-dev libx11-dev patchelf pkg-config python3-pip \
+            python3-setuptools squashfs-tools strace util-linux \
+            libvulkan-dev glslc imagemagick ninja-build unzip rsync
+          # Ubuntu 24.04's system Python is externally managed (PEP 668);
+          # appimage-builder 1.1.0 needs packaging's legacy version parsing.
+          python3 -m pip install --user --break-system-packages appimage-builder 'packaging==21.3'
+
+      - name: Fetch stock rt/ assets
+        run: |
+          test -n "$RT_ASSETS_URL" || {
+            echo "RT_ASSETS_URL repository variable is required." >&2
+            exit 1
+          }
+          mkdir -p release-input/assets
+          curl --fail --location --retry 3 "$RT_ASSETS_URL" --output release-input/rt-assets.archive
+          if [ -n "$RT_ASSETS_SHA256" ]; then
+            echo "$RT_ASSETS_SHA256  release-input/rt-assets.archive" | sha256sum --check --strict
+          fi
+          if file release-input/rt-assets.archive | grep -qi 'zip archive'; then
+            unzip -q release-input/rt-assets.archive -d release-input/assets
+          else
+            tar --extract --file release-input/rt-assets.archive --directory release-input/assets
+          fi
+          rt_asset_dir="$(find release-input/assets -type f -path '*/data/textures.json' -printf '%h\n' | sed 's#/data$##' | head -n 1)"
+          test -n "$rt_asset_dir" || { echo "archive has no rt/data/textures.json" >&2; exit 1; }
+          printf 'D64RT_STOCK_RT=%s\n' "$PWD/$rt_asset_dir" >> "$GITHUB_ENV"
+
+      - name: Fetch optional DLSS SDK
+        if: env.DLSS_SDK_URL != ''
+        run: |
+          mkdir -p release-input/dlss
+          curl --fail --location --retry 3 "$DLSS_SDK_URL" --output release-input/dlss-sdk.tar
+          if [ -n "$DLSS_SDK_SHA256" ]; then
+            echo "$DLSS_SDK_SHA256  release-input/dlss-sdk.tar" | sha256sum --check --strict
+          fi
+          tar --extract --file release-input/dlss-sdk.tar --directory release-input/dlss
+          dlss_sdk_dir="$(find release-input/dlss -type f -path '*/include/nvsdk_ngx.h' -printf '%h\n' | sed 's#/include$##' | head -n 1)"
+          test -n "$dlss_sdk_dir" || { echo "DLSS SDK archive has no include/nvsdk_ngx.h" >&2; exit 1; }
+          printf 'D64RT_DLSS_SDK=%s\n' "$PWD/$dlss_sdk_dir" >> "$GITHUB_ENV"
+
+      - name: Build AppImage
+        run: |
+          version="${{ github.event.release.tag_name || github.ref_name }}"
+          tools/appimage/build-appimage.sh "$version"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Doom64-RT-AppImage
+          path: dist/*.AppImage
+          if-no-files-found: error
+
+      - name: Attach AppImage to the GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.AppImage --clobber

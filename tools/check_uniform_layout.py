@@ -23,6 +23,7 @@ Run from tools/build-rtgl.cmd after GenerateShaders.py -g.
 """
 
 import io
+import os
 import re
 import sys
 from pathlib import Path
@@ -30,8 +31,12 @@ from pathlib import Path
 # Repo root, derived from this file so a clone can live anywhere.
 PROJ_ROOT = Path(__file__).resolve().parents[1]
 
-C_HDR = str(PROJ_ROOT / r"deps\RTGL\Source\Generated\ShaderCommonC.h")
-GLSL_HDR = str(PROJ_ROOT / r"deps\RTGL\Source\Generated\ShaderCommonGLSL.h")
+# Windows keeps RTGL at deps/RTGL; the Linux build carries it inside the
+# engine checkout and points D64RT_RTGL_DIR at it (tools/build-linux.sh).
+RTGL_DIR = Path(os.environ.get("D64RT_RTGL_DIR", PROJ_ROOT / "deps" / "RTGL"))
+
+C_HDR = str(RTGL_DIR / "Source" / "Generated" / "ShaderCommonC.h")
+GLSL_HDR = str(RTGL_DIR / "Source" / "Generated" / "ShaderCommonGLSL.h")
 
 # base alignment, size -- std140
 STD140 = {

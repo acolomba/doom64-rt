@@ -16,7 +16,7 @@ Every light in the game is a real emitter, and every surface answers to it.
 <img src="https://img.shields.io/badge/UPSCALER-DLSS_2_%7C_FSR_2-2E6E8E?style=for-the-badge&labelColor=1B1B1B" alt="Upscaler: DLSS 2 or FSR 2">
 <br>
 <img src="https://img.shields.io/badge/BASE-Retribution_v1.5-8A2B12?style=for-the-badge&labelColor=1B1B1B" alt="Base: Retribution v1.5">
-<img src="https://img.shields.io/badge/PLATFORM-Windows-8A2B12?style=for-the-badge&labelColor=1B1B1B" alt="Platform: Windows">
+<img src="https://img.shields.io/badge/PLATFORM-Windows_%7C_Linux-8A2B12?style=for-the-badge&labelColor=1B1B1B" alt="Platform: Windows | Linux">
 <img src="https://img.shields.io/badge/GPU-hardware_ray_tracing-8A2B12?style=for-the-badge&labelColor=1B1B1B" alt="GPU: hardware ray tracing required">
 </p>
 
@@ -27,6 +27,13 @@ Every light in the game is a real emitter, and every surface answers to it.
 </div>
 
 ---
+
+> [!TIP]
+> **This fork adds a native Linux port.** Download the
+> [**Doom64-RT AppImage** from this fork’s releases](../../releases/latest), drop your
+> game files in a `game/` directory beside it, and run it — see
+> [Install and play on Linux](#install-linux). The Windows instructions below are
+> upstream’s and still apply there.
 
 ## ⛧ &nbsp;Contents
 
@@ -145,6 +152,24 @@ Things that are wrong and known to be wrong.
 
 You need a GPU with hardware ray tracing (NVIDIA RTX, AMD RDNA 2+, Intel Arc) and
 a DOOM II you own. Everything else is free.
+
+<a id="install-linux"></a>
+**On Linux (this fork)**
+
+Download `doom64-rt-*-x86_64.AppImage` from [this fork’s releases](../../releases/latest),
+then:
+
+```sh
+chmod +x doom64-rt-*-x86_64.AppImage
+mkdir game        # next to the AppImage
+# put the Retribution files (step 2) and, if you have it, doom2.wad in game/
+./doom64-rt-*-x86_64.AppImage           # or:  ./doom64-rt-*.AppImage 13  to warp to MAP13
+```
+
+The launcher finds a Steam/GOG `doom2.wad` on its own (`D64RT_IWAD` overrides), picks
+DLSS or FSR2 for the GPU that is actually installed (`D64RT_UPSCALER=dlss|fsr|none`
+overrides), and writes its config to `~/.config/doom64-rt/`. Steps 2 and 3 below — the
+game files — are the same on both platforms; only the `game\` folder location differs.
 
 **1. Download and extract this**
 
@@ -301,6 +326,29 @@ the engine build first. Three things they do deliberately, each one paid for:
 - **It checks the copy of `RTGL1.dll` succeeded.** The DLL is locked while gzdoom is
   running, and a silent failure means fresh shaders get tested against the old renderer.
   Kill `gzdoom.exe` before building.
+
+### Building on Linux (this fork)
+
+No Visual Studio, no vcpkg, no deps\ — the engine carries RTGL as its `libraries/RTGL`
+submodule on this fork’s branches, and one script builds ZMusic, RTGL, the engine and the
+shaders, then stages a runnable bundle:
+
+```sh
+git clone https://github.com/acolomba/doom64-rt.git Doom64-RT
+cd Doom64-RT
+git clone --recurse-submodules -b doom64-rt-linux https://github.com/acolomba/gzdoom-rt.git sourcecode/gzdoom-rt
+# unzip gzdoom-rt-1.0.2.zip (the stock release) somewhere, then:
+D64RT_STOCK_RT=/path/to/gzdoom-rt-1.0.2/rt tools/build-linux.sh
+build/linux/stage/launch-doom64-rt.sh
+```
+
+The engine branch is [acolomba/gzdoom-rt `doom64-rt-linux`](https://github.com/acolomba/gzdoom-rt/tree/doom64-rt-linux)
+(upstream’s `doom64-rt` merged with the Linux port), with
+[acolomba/RTGL `doom64-rt-linux`](https://github.com/acolomba/RTGL/tree/doom64-rt-linux) as its
+path tracer. Native DLSS needs the [NVIDIA DLSS SDK](https://github.com/NVIDIA/DLSS):
+set `D64RT_DLSS_SDK` to its checkout; without it the build falls back to FSR2.
+`tools/appimage/build-appimage.sh` wraps the same build into the released AppImage (CI:
+`.github/workflows/appimage-linux.yml`).
 
 <a id="first-run"></a>
 ### First run
