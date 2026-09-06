@@ -91,7 +91,9 @@ jobs:
       - name: Build AppImage
         run: |
           version="${{ github.event.release.tag_name || github.ref_name }}"
-          tools/appimage/build-appimage.sh "$version"
+          # Clang for the game build (asmjit trips Ubuntu's GCC); RTGL keeps
+          # gcc for libstdc++'s std::expected, same split as gzdoom-rt's CI.
+          CC=clang CXX=clang++ tools/appimage/build-appimage.sh "$version"
 
       - uses: actions/upload-artifact@v4
         with:
