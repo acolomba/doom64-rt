@@ -178,6 +178,8 @@ esac
 # --- map argument: 1-34, or "menu"; the rest is passed through --------------
 MAPARG=()
 WHAT="${1:-menu}"
+CHECKONLY=
+[[ "$WHAT" == check ]] && { CHECKONLY=1; WHAT=menu; }
 [[ "$WHAT" == setup ]] && WHAT=menu
 if [[ "$WHAT" != menu ]]; then
     printf -v n '%02d' "$WHAT" 2>/dev/null || { echo "bad map number: $WHAT" >&2; exit 1; }
@@ -219,6 +221,10 @@ else
 fi
 echo "  upscaler  : $D64RT_UPSCALER   (override with D64RT_UPSCALER=dlss|fsr|none)"
 echo ""
+if [[ -n "$CHECKONLY" ]]; then
+    echo "  check     : everything is in place -- run without 'check' to play"
+    exit 0
+fi
 
 # --- runtime environment ----------------------------------------------------
 # The RT renderer needs an Xlib Vulkan surface; XWayland is fine.

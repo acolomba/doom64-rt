@@ -184,7 +184,10 @@ cp -a "$ROOT/libraries/RTGL/Build/shaders/." "$STAGE/rt/shaders/"
 mkdir -p "$STAGE/rt/bin"
 cp "$RTGL_BUILD/libRTGL1.so" "$STAGE/rt/bin/"
 if [[ -n "${D64RT_DLSS_SDK:-}" ]]; then
-    find "$D64RT_DLSS_SDK" -type f -name 'libnvidia-ngx-dlss.so*' \
+    # dlss = Super Resolution, dlssd = Ray Reconstruction. dlssg (frame
+    # generation) is not wired up on Linux, so it stays out of the bundle.
+    find "$D64RT_DLSS_SDK/lib" -type f \
+        \( -name 'libnvidia-ngx-dlss.so*' -o -name 'libnvidia-ngx-dlssd.so*' \) \
         -exec cp -a {} "$STAGE/rt/bin/" \;
 fi
 
