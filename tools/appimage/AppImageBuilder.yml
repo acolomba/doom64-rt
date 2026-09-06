@@ -8,8 +8,10 @@ AppDir:
     name: Doom64-RT
     icon: d64rt_icon
     version: latest
-    exec: launch-doom64-rt.sh
-    exec_args: $@
+    # appimage-builder's AppRun requires an ELF entrypoint, so the bundled
+    # bash is the executable and the launcher script is its argument.
+    exec: usr/bin/bash
+    exec_args: $APPDIR/launch-doom64-rt.sh $@
   apt:
     arch: amd64
     sources:
@@ -18,6 +20,7 @@ AppDir:
     - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-updates main universe
       key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C'
     include:
+    - bash
     - libopenal1
     - libsdl2-2.0-0
     - libsndfile1
