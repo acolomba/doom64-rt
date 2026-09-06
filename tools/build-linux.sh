@@ -134,6 +134,21 @@ cp "$GAME_BUILD/"*.pk3 "$STAGE/"
 cp -a "$GAME_BUILD/soundfonts" "$GAME_BUILD/fm_banks" "$STAGE/"
 cp -a "$ZMUSIC_BUILD/source/libzmusic.so"* "$STAGE/"
 
+# dlopen("libopenal.so.1") honors the binary's RUNPATH, and a Homebrew
+# toolchain leaves its lib dir in there -- shadowing the system's
+# PipeWire-enabled OpenAL with brew's, which cannot open an audio device.
+# The launcher puts the stage root on LD_LIBRARY_PATH (searched before
+# RUNPATH), so a symlink to the system library wins. The AppImage is
+# unaffected: CI has no brew and bundles libopenal1 from apt.
+if command -v brew >/dev/null; then
+    for sysdir in /usr/lib64 /usr/lib/x86_64-linux-gnu; do
+        if [[ -e "$sysdir/libopenal.so.1" ]]; then
+            ln -sf "$sysdir/libopenal.so.1" "$STAGE/libopenal.so.1"
+            break
+        fi
+    done
+fi
+
 # Stock rt/ minus what this project never loads (see build-gzdoom-rt.cmd for
 # the accounting: replace/ scenes/ bin_remix/ filter/ sounds/ are 2.2 GB of
 # Doom II payload). bin/ additionally holds only Windows DLLs.
