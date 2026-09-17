@@ -22,6 +22,9 @@ Every light in the game is a real emitter, and every surface answers to it.
 
 <p>
 <a href="AI-DECLARATION.md"><img src="https://img.shields.io/badge/䷼%20AI--DECLARATION-copilot-fee2e2?labelColor=fee2e2" alt="AI-DECLARATION: copilot"></a>
+  
+  [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/jlrouzies)
+  
 </p>
 
 </div>
