@@ -20,7 +20,7 @@ This format is based on [AI-DECLARATION.md](https://ai-declaration.md/en/0.1.2).
 
 This Doom 64 RT project is AI-written under human direction, and it would be misleading to present it any other way.
 
-I am a software engineer and IT administrator, but not a game developer. No graphics programming, no renderer background, no experience with the Doom engine or with path tracing before this project started. 
+I am a software engineer and IT administrator, but not a game developer. No graphics programming, no renderer background, no experience with the Doom engine or with path tracing before this project started. I only have good "experience" with video games rendering techniques, you know, I was the guy making Graphic Cards PowerPoint presentations at school about AO, Tesselation, etc. :) ... and still am fascinated by visual fidelity evolution in video games. 
 
 I take no credit in the ray traced engine and the modified GzDoom-RT. Only credit is the time taken to get the implementation done (already at around 50-60h, even with AI), and the ideas of additional visual, sound and HUD implemented.  
 
