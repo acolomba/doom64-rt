@@ -149,6 +149,12 @@ Things that are wrong and known to be wrong.
 You need a GPU with hardware ray tracing (NVIDIA RTX, AMD RDNA 2+, Intel Arc) and
 a DOOM II you own. Everything else is free.
 
+> [!TIP]
+> **On Linux?** A native port is maintained by [@acolomba](https://github.com/acolomba) as an
+> AppImage — [releases](https://github.com/acolomba/doom64-rt/releases), source on the
+> [`linux-port`](https://github.com/acolomba/doom64-rt/tree/linux-port) branch of their fork.
+> It is a separate project, not built or tested here.
+
 **1. Download and extract this**
 
 [**Releases**](https://github.com/jlrouzies-fr/doom64-rt/releases) → `Doom64-RT.zip` (~124 MB).

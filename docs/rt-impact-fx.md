@@ -556,7 +556,7 @@ different palette.
 camera turns and the eye reads that as noise rather than style — the same reasoning as
 `rt_smoke_stylize_grid`.
 
-No filtering work was needed: `rt_smoothtextures` defaults false so the game is already
+No filtering work was needed: `rt_texture_filter` defaults to 0 (nearest) so the game is already
 `RG_SAMPLER_FILTER_NEAREST`, and with no texture bound there is nothing to filter.
 `rt_ef_vintage` is **not** the tool — it is whole-screen pixelization.
 
