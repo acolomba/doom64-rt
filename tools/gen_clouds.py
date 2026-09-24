@@ -90,7 +90,7 @@ OUT_DIR = PROJ_ROOT / r"tools\d64r-rt-sky\textures"
 # looks. 512 read as soft and low-detail overhead.
 #
 # (The other half of that fix is in the engine: these slices are uploaded with an
-# explicit RG_SAMPLER_FILTER_LINEAR, because rt_smoothtextures is off globally --
+# explicit RG_SAMPLER_FILTER_LINEAR, because rt_texture_filter defaults to nearest --
 # correct for 64x64 Doom wall art, badly wrong for a magnified cloud, where
 # NEAREST turns a soft edge into visible square blocks.)
 RES = 1024

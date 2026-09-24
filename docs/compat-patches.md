@@ -2441,3 +2441,33 @@ keeps its own deliberate overrides.
 This is also the first thing the new knobs bought that was not previously possible: the same
 retune through `rt_spark_debris_size` / `_life` would have taken every concrete chip, wood
 splinter and dirt crumb in the game with it.
+
+## GitHub issues #5, #13, #15 (2026-09-24)
+
+### #13 -- Intel Arc iGPU: "Can't find memory type for given memory property flags (6)"
+`deps/RTGL/Source/PhysicalDevice.cpp::GetMemoryTypeIndex`. Flags 6 is HOST_VISIBLE |
+HOST_COHERENT, and the picker also *excluded* any type that was DEVICE_LOCAL. On a
+unified-memory GPU (the reporter's Arc 140V) every memory type is device-local, so nothing
+matched and RTGL1 failed during device creation. The exclusion is now a preference: a strict
+pass first (discrete GPUs pick exactly what they did before), then any type carrying the
+required flags. Untested on Intel hardware here -- a later failure on that GPU is possible.
+
+### #5 -- a desktop cursor stuck at the centre of a fullscreen game
+`src/common/platform/win32/i_input.cpp::I_StartTic`. `SetCursorState` only calls
+`ShowCursor` while the game window is foreground. The RT boot takes seconds, so the mouse
+grab often lands while another window is in front: the cursor was centred and left drawn.
+Alt-tab did not fix it because a fullscreen grab never un-grabs; only Alt+Enter did, since
+`PositionWindow` is the one caller of `RT_EnsureCursorState`. That is now called every tic
+(no-op unless the state is wrong).
+
+### #15 -- texture filtering: `rt_texture_filter` 0 nearest / 1 bilinear / 2 N64 three-point
+`gl_texture_filter` is a GL-renderer cvar and does nothing under RT; the old bool
+`rt_smoothtextures` (bilinear) was console-only. It is replaced by `rt_texture_filter`, an
+archived, **unpinned** menu setting (Options > Quality > Texture filtering, and the stock
+"Texture filter mode" row in the GL texture menu now drives it too).
+Mode 2 is shader-side: `RgDrawFrameTexturesParams::albedoFilterMode` ->
+`globalUniform.texFilterParams` (a new vec4 after the scalar run; x = mode, y = the
+sampler's mip bias) -> `HitInfo.inl::getTextureSampleThreePoint`, which blends the three
+nearest texels of the diagonal-split quad at one whole mip level, cancelling the sampler's
+bias so the hardware lands on exactly that level. **Albedo of ray-traced surfaces only**:
+normal/ORM/emissive maps, alpha-test and the rasterized overlays stay on the sampler.

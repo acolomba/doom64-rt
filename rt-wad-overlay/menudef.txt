@@ -519,6 +519,15 @@ OptionValue "RTBounceEnergy"
 // that sells WATER, and a player meeting it in an options list has no way to
 // know that. Sludge does not need it: rt_sludge_refl 0 already takes the mud
 // bed down the no-split path on its own. Console only, still archived.
+// rt_texture_filter (GitHub issue #15). Archived and unpinned like the rest of
+// this menu. 2 is done in RTGL1's hit shader on the ray-traced albedo.
+OptionValue "RTTextureFilter"
+{
+	0, "Nearest (crisp)"
+	1, "Bilinear"
+	2, "N64 three-point"
+}
+
 OptionMenu "RT_QualityMenu" protected
 {
 	Title "QUALITY"
@@ -548,6 +557,12 @@ OptionMenu "RT_QualityMenu" protected
 	StaticText " "
 	StaticText "Higher values cost GPU time.", 1
 	StaticText "Bounces past the shadow ray depth collect glow only.", 1
+	StaticText " "
+	StaticText "Textures", 1
+	Option "Texture filtering",			"rt_texture_filter",	"RTTextureFilter"
+	StaticText "Not part of the preset. N64 three-point is the", 1
+	StaticText "original console's filter; it smooths the colour", 1
+	StaticText "texture only, the relief maps stay crisp.", 1
 	StaticText " "
 	Submenu "Full settings",			"RT_QualityMenuFull"
 	StaticText "Every knob a preset drives, one at a time.", 1
@@ -2871,7 +2886,9 @@ OptionValue ShadowMapFilter
 OptionMenu "GLTextureGLOptions" protected
 {
 	Title "$GLTEXMNU_TITLE"
-	Option "$GLTEXMNU_TEXFILTER",		gl_texture_filter,				"FilterModes"
+	// gl_texture_filter is a GL-renderer setting and does nothing under RT
+	// (GitHub issue #15 was a player finding exactly that). Same row, RT cvar.
+	Option "$GLTEXMNU_TEXFILTER",		rt_texture_filter,				"RTTextureFilter"
 	Option "$GLTEXMNU_ANISOTROPIC",		gl_texture_filter_anisotropic,	"Anisotropy"
 
 	ifOption(MMX)
